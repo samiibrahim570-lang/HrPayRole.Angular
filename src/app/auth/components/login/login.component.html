@@ -1,41 +1,104 @@
-<div class="login-wrapper">
-  <div class="login-header">
-    <div class="logo-icon"><i class="bi bi-building"></i></div>
-    <h2>Invoice Management</h2>
-    <p>Enterprise Suite &amp; Workforce Management</p>
+<div class="stage">
+
+  <!-- LEFT: brand / background image panel -->
+  <div class="brand-panel">
+    <div class="brand-top">
+      <div class="brand-mark">
+        <div class="mark-icon"><i class="bi bi-building"></i></div>
+        <div>
+          <span>Payroll Pro</span>
+          <small>Enterprise Suite</small>
+        </div>
+      </div>
+
+      <div class="brand-headline">
+        <span class="eyebrow">Workforce &amp; Payroll Management</span>
+        <h1>A <em>VIP</em> payroll experience,<br />all in one place.</h1>
+        <p>Salary processing, invoices, and attendance — all secure, fast, and automated.</p>
+      </div>
+
+      <div class="feature-row">
+        <div class="f"><i class="bi bi-shield-check"></i> Bank-grade Security</div>
+        <div class="f"><i class="bi bi-lightning-charge"></i> Instant Payslips</div>
+        <div class="f"><i class="bi bi-graph-up-arrow"></i> Real-time Reports</div>
+      </div>
+    </div>
+
+    <div class="payslip-float">
+      <div class="ps-top">
+        <span>This Month Payout</span>
+        <i class="bi bi-wallet2"></i>
+      </div>
+      <div class="ps-amount">PKR 4,82,300</div>
+      <div class="ps-sub">248 employees • processed on time</div>
+      <div class="ps-bar"><i></i></div>
+    </div>
+
+    <div class="brand-bottom">
+      <div><strong>2,400+</strong>Companies Trust Us</div>
+      <div><strong>99.9%</strong>Uptime SLA</div>
+      <div><strong>24/7</strong>Priority Support</div>
+    </div>
   </div>
 
-  <div class="login-card">
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <input type="text" class="form-control" placeholder="Work Email Address" formControlName="email" />
+  <!-- RIGHT: form panel -->
+  <div class="form-panel">
+    <div class="login-wrapper">
+      <div class="login-header">
+        <span class="tag">VIP Access</span>
+        <h2>Welcome back</h2>
+        <p>Sign in to your enterprise account</p>
       </div>
 
-      <div class="form-group password-group">
-        <input
-          [type]="showPassword ? 'text' : 'password'"
-          class="form-control"
-          placeholder="Password"
-          formControlName="password"
-        />
-        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'" (click)="togglePassword()"></i>
+      <div class="login-card">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <div class="form-group">
+            <label>Work Email Address</label>
+            <div class="input-wrap">
+              <i class="bi bi-envelope left-icon"></i>
+              <input type="text" class="form-control" placeholder="you@company.com" formControlName="email" />
+            </div>
+          </div>
+
+          <div class="form-group password-group">
+            <label>Password</label>
+            <div class="input-wrap">
+              <i class="bi bi-lock left-icon"></i>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                class="form-control"
+                placeholder="••••••••"
+                formControlName="password"
+              />
+              <i class="bi toggle-eye" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'" (click)="togglePassword()"></i>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="remember-me">
+              <input type="checkbox" formControlName="rememberMe" />
+              Remember Me
+            </label>
+            <a href="javascript:void(0)" class="forgot-password">Forgot Password?</a>
+          </div>
+
+          <div class="error-message" *ngIf="errorMessage">
+            <i class="bi bi-exclamation-circle"></i> {{ errorMessage }}
+          </div>
+
+          <button type="submit" class="btn-signin" [disabled]="isLoading">
+            <span *ngIf="!isLoading">Sign In</span>
+            <span *ngIf="isLoading">Signing In...</span>
+            <i class="bi bi-box-arrow-in-right" *ngIf="!isLoading"></i>
+          </button>
+        </form>
+
+        <div class="divider">Secured Connection</div>
+        <div class="secure-note"><i class="bi bi-shield-lock-fill"></i> 256-bit SSL encrypted login</div>
       </div>
 
-      <div class="form-options">
-        <label class="remember-me">
-          <input type="checkbox" formControlName="rememberMe" />
-          Remember Me
-        </label>
-        <a href="javascript:void(0)" class="forgot-password">Forgot Password?</a>
-      </div>
-
-      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-      <button type="submit" class="btn-signin" [disabled]="isLoading">
-        <span *ngIf="!isLoading">Sign In</span>
-        <span *ngIf="isLoading">Signing In...</span>
-        <i class="bi bi-box-arrow-in-right" *ngIf="!isLoading"></i>
-      </button>
-    </form>
+      <div class="login-footer">© 2026 Payroll Pro — Enterprise Workforce Suite</div>
+    </div>
   </div>
+
 </div>
