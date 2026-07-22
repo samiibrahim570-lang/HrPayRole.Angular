@@ -1,0 +1,41 @@
+<div class="login-wrapper">
+  <div class="login-header">
+    <div class="logo-icon"><i class="bi bi-building"></i></div>
+    <h2>Invoice Management</h2>
+    <p>Enterprise Suite &amp; Workforce Management</p>
+  </div>
+
+  <div class="login-card">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Work Email Address" formControlName="email" />
+      </div>
+
+      <div class="form-group password-group">
+        <input
+          [type]="showPassword ? 'text' : 'password'"
+          class="form-control"
+          placeholder="Password"
+          formControlName="password"
+        />
+        <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'" (click)="togglePassword()"></i>
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" formControlName="rememberMe" />
+          Remember Me
+        </label>
+        <a href="javascript:void(0)" class="forgot-password">Forgot Password?</a>
+      </div>
+
+      <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <button type="submit" class="btn-signin" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading">Signing In...</span>
+        <i class="bi bi-box-arrow-in-right" *ngIf="!isLoading"></i>
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+.offcanvas-md {
+    width: 260px;
+    flex-shrink: 0;
+}
+
+main {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+}
+
+.offcanvas-body {
+    height: 100%;
+}

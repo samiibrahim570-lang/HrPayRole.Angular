@@ -1,0 +1,115 @@
+<!-- Top Navbar -->
+<nav class="navbar navbar-expand bg-body border-bottom sticky-top px-3 py-2">
+  <button class="btn btn-outline-secondary d-md-none me-2" type="button"
+          data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+    <i class="bi bi-list fs-5"></i>
+  </button>
+
+  <form class="d-none d-md-flex flex-grow-1 me-4" style="max-width: 420px;">
+    <div class="input-group">
+      <span class="input-group-text bg-body-tertiary border-0"><i class="bi bi-search"></i></span>
+      <input type="text" class="form-control bg-body-tertiary border-0" [placeholder]="'search_placeholder' | translate">
+    </div>
+  </form>
+
+  <div class="ms-auto d-flex align-items-center gap-2 gap-md-3">
+    <button class="btn btn-link text-body position-relative p-1">
+      <i class="bi bi-bell fs-5"></i>
+      <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger rounded-circle"></span>
+    </button>
+
+    <button class="btn btn-link text-body p-1 d-none d-sm-inline-block" (click)="toggleLang()" title="Change Language">
+      <i class="bi bi-translate fs-5"></i>
+    </button>
+
+    <button class="btn btn-link text-body p-1 d-none d-sm-inline-block" (click)="toggleTheme()" title="Toggle Theme">
+      <i class="bi" [ngClass]="(theme$ | async) === 'dark' ? 'bi-sun' : 'bi-moon'"></i>
+    </button>
+
+    <div class="vr d-none d-sm-block"></div>
+
+    <div class="d-flex align-items-center gap-2">
+      <div class="text-end d-none d-sm-block">
+        <div class="fw-semibold small">{{ user?.firstName }} {{ user?.lastName }}</div>
+        <div class="text-muted small">{{ user?.roleName }}</div>
+      </div>
+      <img [src]="user?.image || 'assets/avatar-placeholder.png'"
+           class="rounded-circle" width="40" height="40" alt="user">
+    </div>
+  </div>
+</nav>
+
+<div class="d-flex" style="min-height: calc(100vh - 60px);">
+
+  <!-- Sidebar: offcanvas on mobile, static column on md+ -->
+  <div class="offcanvas-md offcanvas-start bg-body border-end" tabindex="-1"
+       id="sidebarOffcanvas" style="width: 260px;">
+    <div class="offcanvas-header d-md-none border-bottom">
+      <h5 class="offcanvas-title">{{ 'menu_title' | translate }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body d-flex flex-column p-0">
+      <div class="d-flex align-items-center gap-2 p-3 border-bottom">
+        <div class="bg-primary rounded-3 d-flex align-items-center justify-content-center"
+             style="width: 40px; height: 40px;">
+          <i class="bi bi-building text-white fs-5"></i>
+        </div>
+        <div>
+          <div class="fw-bold text-primary lh-1">{{ 'brand_name' | translate }}</div>
+          <div class="text-muted small">{{ 'brand_tagline' | translate }}</div>
+        </div>
+      </div>
+
+      <ul class="nav nav-pills flex-column p-2 flex-grow-1 overflow-auto">
+        <ng-container *ngFor="let item of menu$ | async">
+          <ng-container *ngTemplateOutlet="menuItemTpl; context: { $implicit: item }"></ng-container>
+        </ng-container>
+      </ul>
+
+      <div class="p-3 border-top">
+        <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" (click)="logout()">
+          <i class="bi bi-box-arrow-right"></i> {{ 'logout' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main class="flex-grow-1 p-3 p-md-4 bg-body-tertiary">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<!-- Recursive menu template -->
+<ng-template #menuItemTpl let-item>
+  <li class="nav-item">
+    <ng-container *ngIf="item.children.length === 0; else hasChildren">
+      <a class="nav-link text-body d-flex align-items-center gap-2 rounded-3 py-2 px-3"
+         style="font-size: 0.85rem;"
+         [routerLink]="item.path"
+         routerLinkActive="active bg-primary-subtle text-primary fw-semibold">
+        <i class="bi {{ getIcon(item.icon) }}" style="font-size: 0.95rem;"></i>
+        <span>{{ item.title | translate }}</span>
+      </a>
+    </ng-container>
+
+    <ng-template #hasChildren>
+      <a class="nav-link text-body d-flex align-items-center gap-2 rounded-3 py-2 px-3"
+         style="font-size: 0.85rem;"
+         data-bs-toggle="collapse"
+         [attr.href]="'#submenu-' + item.id"
+         role="button">
+        <i class="bi {{ getIcon(item.icon) }}" style="font-size: 0.95rem;"></i>
+        <span class="flex-grow-1">{{ item.title | translate }}</span>
+        <i class="bi bi-chevron-down" style="font-size: 0.7rem;"></i>
+      </a>
+      <div class="collapse" [id]="'submenu-' + item.id">
+        <ul class="nav nav-pills flex-column ms-3 gap-1 mt-1">
+          <ng-container *ngFor="let child of item.children">
+            <ng-container *ngTemplateOutlet="menuItemTpl; context: { $implicit: child }"></ng-container>
+          </ng-container>
+        </ul>
+      </div>
+    </ng-template>
+  </li>
+</ng-template>
