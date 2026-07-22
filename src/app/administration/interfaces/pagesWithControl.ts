@@ -74,46 +74,6 @@ export class Role {
     public globalId: string
   ) {}
 }
-
-// export class RolePagePermissionResponse {
-//   constructor(
-//     public roleId: number,
-//     public pageId: number,
-//     public pageName: string,
-//     public isCollapsed: boolean,
-//     public parentId: number,
-//     public isView: boolean,
-//     public isAdd: boolean,
-//     public isEdit: boolean,
-//     public isDeleted: boolean,
-//     public roleControlPermissions: RoleControlPermissionResponse[] = [],
-//     public isActive: boolean,
-//     public createdOn: string,
-//     public createdBy: number,
-//     public modifiedOn: string,
-//     public modifiedBy: number,
-//     public id: number,
-//     public globalId: string
-//   ) {}
-// }
-
-// export class RoleControlPermissionResponse {
-//   constructor(
-//     public rolePagePermissionId: number,
-//     public pageId: number,
-//     public controlId: number,
-//     public isView: boolean,
-//     public isActive: boolean,
-//     public isDeleted: boolean,
-//     public createdOn: string,
-//     public createdBy: number,
-//     public modifiedOn: string,
-//     public modifiedBy: number,
-//     public id: number,
-//     public globalId: string
-//   ) {}
-// }
-
 export interface UserRegisterResponse {
   id: number,
   globalId: string,
@@ -136,6 +96,27 @@ export interface UserRegisterResponse {
   isActive: boolean;
 }
 
+export interface UserRegister {
+  email: string;
+  password?: string; // Optional property
+  confirmPassword?: string; // Optional property
+  firstName: string;
+  lastName: string;
+  contactNumber: string;
+  whatsAppNumber: string;
+  phoneNumber: string;
+  roleName:string;
+  roleId:number;
+  address: string;
+  image: string;
+  isActive: boolean;
+  modifiedOn: string;
+  createdOn: string;
+  createdByName: string;
+  modifiedByName: string;
+  id: number,
+  globalId: string,
+}
 
 // Interface for the page data
 export  interface Page {

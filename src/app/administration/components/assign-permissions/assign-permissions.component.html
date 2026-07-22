@@ -190,8 +190,8 @@
       </ng-container>
 
       <!-- Sticky action bar -->
-      <div class="rp-action-bar" *ngIf="pagesResponse.length > 0">
-        <button type="button" class="rp-btn rp-btn--primary" [disabled]="isSaving" (click)="savePermissions()">
+      <div class="sticky-footer" *ngIf="pagesResponse.length > 0">
+        <button type="button" class="ms-2 rp-btn rp-btn--primary" [disabled]="isSaving" (click)="savePermissions()">
           <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
           <i class="fas fa-floppy-disk me-2" *ngIf="!isSaving"></i>
           {{ isSaving ? 'Saving...' : (editMode ? 'Update Role' : 'Save Role') }}

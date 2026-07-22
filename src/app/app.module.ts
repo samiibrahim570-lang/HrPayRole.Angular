@@ -31,7 +31,6 @@ registerLocaleData(en);
     SharedModule,
     LayoutModule,
     DashboardModule,
-    AdministrationModule
   ],
   providers: [
     {
