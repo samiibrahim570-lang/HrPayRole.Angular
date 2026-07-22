@@ -14,6 +14,7 @@ import { AuthinterceptorService } from './auth/service/authinterceptor.service';
 import { LicenseInterceptor } from './auth/service/license.interceptor';
 import { AuthRoutingModule } from './auth/auth-routing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AdministrationModule } from './administration/administration.module';
 registerLocaleData(en);
 
 @NgModule({
@@ -29,7 +30,8 @@ registerLocaleData(en);
     AuthModule,
     SharedModule,
     LayoutModule,
-    DashboardModule
+    DashboardModule,
+    AdministrationModule
   ],
   providers: [
     {

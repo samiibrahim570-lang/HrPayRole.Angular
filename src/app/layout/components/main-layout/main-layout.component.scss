@@ -1,0 +1,213 @@
+// ---------------------------------------------
+// Tokens
+// ---------------------------------------------
+:host {
+    --sidebar-width: 264px;
+    --navbar-height: 60px;
+    --radius-sm: .5rem;
+    --radius-md: .75rem;
+    --scrollbar: rgba(0, 0, 0, .18);
+
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+}
+
+// ---------------------------------------------
+// Navbar
+// ---------------------------------------------
+.app-navbar {
+    height: var(--navbar-height);
+    flex: 0 0 auto;
+    z-index: 1030;
+}
+
+.app-search .input-group-text,
+.app-search .form-control {
+    border-radius: var(--radius-sm);
+}
+
+.app-search .input-group-text {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.app-search .form-control {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.app-search .form-control:focus {
+    box-shadow: none;
+    background-color: var(--bs-tertiary-bg);
+}
+
+.icon-btn {
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color .15s ease;
+}
+
+.icon-btn:hover {
+    background-color: var(--bs-tertiary-bg);
+    text-decoration: none;
+}
+
+.avatar-img {
+    object-fit: cover;
+}
+
+// ---------------------------------------------
+// Layout shell — no magic-number calc(), navbar
+// and layout share a flex column so sizing can
+// never drift out of sync.
+// ---------------------------------------------
+.layout {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+}
+
+// ---------------------------------------------
+// Sidebar
+// ---------------------------------------------
+.app-sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+}
+
+.brand-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--bs-primary);
+}
+
+.sidebar-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.sidebar-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background: var(--scrollbar);
+    border-radius: 3px;
+}
+
+// Nav links
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .75rem;
+    border-radius: var(--radius-sm);
+    color: var(--bs-body-color);
+    font-size: .9rem;
+    transition: background-color .15s ease, color .15s ease;
+}
+
+.nav-link:hover {
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+}
+
+.nav-link.active {
+    background: var(--bs-primary);
+    color: #fff !important;
+    font-weight: 500;
+}
+
+.nav-link.active i {
+    color: #fff;
+}
+
+.nav-link:focus-visible,
+.icon-btn:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.nav-link .bi {
+    font-size: 1.05rem;
+    width: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+// Chevron rotates when its collapse target is open
+.chevron {
+    transition: transform .2s ease;
+    font-size: .8rem;
+}
+
+.nav-link[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+}
+
+// Submenu — indent with a guide line instead of a bare margin
+.submenu {
+    margin-left: 1.4rem;
+    padding-left: .6rem;
+    border-left: 1px solid var(--bs-border-color);
+}
+
+.submenu .nav-link {
+    font-size: .85rem;
+    padding-block: .45rem;
+}
+
+// ---------------------------------------------
+// Main content
+// ---------------------------------------------
+.content {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 1.5rem;
+    background: var(--bs-tertiary-bg);
+}
+
+@media (max-width: 767.98px) {
+    .content {
+        padding: 1rem;
+    }
+}
+
+// ---------------------------------------------
+// Offcanvas sizing on mobile (Bootstrap already
+// handles show/hide + backdrop; this only pins
+// the width so the drawer isn't full-screen).
+// ---------------------------------------------
+@media (max-width: 767.98px) {
+    .app-sidebar.offcanvas-md {
+        width: min(var(--sidebar-width), 82vw);
+    }
+}

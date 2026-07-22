@@ -10,6 +10,7 @@ import { AuthGuard } from '../auth/interface/auth.guard';
     canActivate: [AuthGuard],
     children: [
       {path: 'dashboard', loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)},
+      {path: 'administration', loadChildren: () => import('../administration/administration.module').then(m => m.AdministrationModule)},
     ],
   },
 ];

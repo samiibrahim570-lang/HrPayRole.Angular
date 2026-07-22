@@ -9,7 +9,7 @@ import { Lang, TranslationService } from '../../service/translation.service';
 @Component({
   selector: 'app-main-layout',
   templateUrl: './main-layout.component.html',
-  styleUrls: ['./main-layout.component.css']
+  styleUrls: ['./main-layout.component.scss']
 })
 export class MainLayoutComponent {
   menu$: Observable<MenuItem[]>;
@@ -67,6 +67,10 @@ export class MainLayoutComponent {
         error: (err) => console.error('Menu load failed', err)
       });
     }
+  }
+
+  onImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = 'assets/avatar-placeholder.png';
   }
 
   getIcon(icon: string): string {

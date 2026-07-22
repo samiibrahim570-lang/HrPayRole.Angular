@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, tap, Observable,  } from 'rxjs';
-import { MenuItem, RolePagePermission, RoleResponse } from '../interface/menu-item';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+
+import { MenuItem, RolePagePermission, RoleResponse } from '../interface/menu-item';
 import { ResponseModel } from 'src/app/shared/interface/ResponsemodelArray';
 import { environment } from 'src/environments/environment.prod';
 
@@ -10,18 +11,21 @@ import { environment } from 'src/environments/environment.prod';
 })
 export class MenuService {
 
-  private apiUrl: string = environment.apiUrl;
-  private menuKey: string = 'menuData';
+  private apiUrl = environment.apiUrl;
+  private menuKey = 'menuData';
+
   private menuSubject = new BehaviorSubject<MenuItem[]>(this.loadFromStorage());
   menu$ = this.menuSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getRoleMenu(roleId: number): Observable<ResponseModel<RoleResponse>> {
     return this.http
-      .get<ResponseModel<RoleResponse>>(`${this.apiUrl}Role/GetBy-Id?roleId=${roleId}`)
+      .get<ResponseModel<RoleResponse>>(
+        `${this.apiUrl}Role/GetBy-Id?roleId=${roleId}`
+      )
       .pipe(
-        tap((res) => {
+        tap(res => {
           if (res?.result?.rolePagePermissions) {
             const tree = this.buildMenuTree(res.result.rolePagePermissions);
             this.setMenu(tree);
@@ -32,24 +36,42 @@ export class MenuService {
 
   private buildMenuTree(permissions: RolePagePermission[]): MenuItem[] {
     const pages: MenuItem[] = permissions
-      .filter((p) => p.isView && p.page?.isActive && !p.page?.isDeleted && !p.page?.isHidden)
-      .map((p) => ({ ...p.page, children: [] }))
-      .sort((a, b) => a.seriolNumber - b.seriolNumber);
-
+      .filter(p =>
+        p.isView &&
+        p.page &&
+        p.page.isActive &&
+        !p.page.isDeleted &&
+        !p.page.isHidden
+      )
+      .map(p => ({
+        ...p.page,
+        children: []
+      }));
     const pageMap = new Map<number, MenuItem>();
-    pages.forEach((page) => pageMap.set(page.id, page));
-
+    pages.forEach(page => {
+      pageMap.set(page.id, page);
+    });
     const tree: MenuItem[] = [];
-
-    pages.forEach((page) => {
+    pages.forEach(page => {
       if (page.parentId && pageMap.has(page.parentId)) {
         pageMap.get(page.parentId)!.children.push(page);
-      } else if (!page.parentId) {
+      } else {
         tree.push(page);
       }
     });
+    return this.sortMenu(tree);
+  }
 
-    return tree;
+  private sortMenu(items: MenuItem[]): MenuItem[] {
+    return items
+      .sort((a, b) => (a.seriolNumber ?? 9999) - (b.seriolNumber ?? 9999))
+      .map(item => ({
+        ...item,
+        children: item.children?.length
+          ? this.sortMenu(item.children)
+          : []
+      }));
+
   }
 
   setMenu(menu: MenuItem[]): void {
@@ -68,13 +90,14 @@ export class MenuService {
 
   private loadFromStorage(): MenuItem[] {
     const menu = localStorage.getItem(this.menuKey);
-    if (menu) {
-      try {
-        return JSON.parse(menu) as MenuItem[];
-      } catch {
-        return [];
-      }
+    if (!menu) {
+      return [];
     }
-    return [];
+    try {
+      const parsed = JSON.parse(menu) as MenuItem[];
+      return this.sortMenu(parsed);
+    } catch {
+      return [];
+    }
   }
 }

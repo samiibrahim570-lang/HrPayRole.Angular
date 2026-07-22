@@ -1,0 +1,282 @@
+<!-- assign-permissions.component.html -->
+<div class="rp-page"  style="background-color: #ffff;">
+
+  <!-- Toasts -->
+  <div class="rp-toast-stack">
+    <div class="rp-toast" *ngFor="let toast of toasts" [ngClass]="'rp-toast--' + toast.type">
+      <i class="fas" [ngClass]="{
+        'fa-circle-check': toast.type === 'success',
+        'fa-circle-exclamation': toast.type === 'error',
+        'fa-circle-info': toast.type === 'info'
+      }"></i>
+      <span>{{ toast.text }}</span>
+      <button type="button" class="rp-toast__close" (click)="dismissToast(toast.id)" aria-label="Dismiss">&times;</button>
+    </div>
+  </div>
+
+  <!-- Page header -->
+  <div class="rp-header">
+    <div>
+      <h4 class="rp-header__title">Roles &amp; Permissions</h4>
+      <p class="rp-header__subtitle">Create roles, configure module access, and see who each role is assigned to.</p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ul class="nav rp-tabs" role="tablist">
+    <li class="nav-item" *ngFor="let tab of mainTabs; let i = index">
+      <button type="button" class="rp-tab" [class.rp-tab--active]="activeTab === i" (click)="onTabChange(i)">
+        <i class="fas" [ngClass]="i === 0 ? 'fa-lock' : 'fa-users'"></i>
+        {{ getMainTab(tab) }}
+        <span class="rp-tab__badge" *ngIf="i === 1 && userList.length">{{ userList.length }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <div class="rp-panel">
+
+    <!-- ============================================================ -->
+    <!-- TAB 0: Permissions                                            -->
+    <!-- ============================================================ -->
+    <div class="rp-tabpane" *ngIf="activeTab === 0" [formGroup]="roleForm">
+
+      <div class="rp-info-banner">
+        <i class="fas fa-shield-halved"></i>
+        <span>Changes made here directly affect the access rights of every user assigned to this role. Review carefully before saving.</span>
+      </div>
+
+      <!-- Loading skeleton -->
+      <div class="rp-card" *ngIf="isLoadingPages">
+        <div class="rp-skeleton rp-skeleton--title"></div>
+        <div class="rp-skeleton rp-skeleton--row" *ngFor="let s of [1,2,3,4]"></div>
+      </div>
+
+      <ng-container *ngIf="!isLoadingPages">
+
+        <!-- Role name -->
+        <div class="rp-card mb-3" *ngIf="pagesResponse.length > 0">
+          <div class="rp-card__header">
+            <h6><i class="fas fa-tag"></i> {{ editMode ? 'Edit Role' : 'Create Role' }}</h6>
+            <span class="rp-pill" *ngIf="editMode">Editing existing role</span>
+          </div>
+          <div class="rp-card__body">
+            <div class="row">
+              <div class="col-12 col-md-6">
+                <label for="roleNameInput" class="form-label">Role name <span class="text-danger">*</span></label>
+                <input
+                  formControlName="roleName"
+                  id="roleNameInput"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="roleNameError"
+                  autocomplete="off"
+                  placeholder="e.g. Regional Manager"
+                  (blur)="validateRoleName()" />
+                <div class="invalid-feedback" *ngIf="roleNameError">
+                  {{ roleNameErrorMessage }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permission matrix -->
+        <div class="rp-card mb-3" *ngIf="pagesResponse.length > 0">
+          <div class="rp-card__header">
+            <h6><i class="fas fa-table-cells"></i> Module Access</h6>
+            <div class="rp-search">
+              <i class="fas fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search modules..." [(ngModel)]="moduleSearchTerm" [ngModelOptions]="{standalone: true}" />
+            </div>
+          </div>
+
+          <div class="rp-card__body p-0">
+            <div class="table-responsive">
+              <table class="rp-table">
+                <thead>
+                  <tr>
+                    <th class="rp-col-module">Module</th>
+                    <th class="text-center">View</th>
+                    <th class="text-center">Add</th>
+                    <th class="text-center">Edit</th>
+                    <th class="text-center">Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="rp-row-controlall">
+                    <td>
+                      <i class="fas fa-layer-group me-2"></i>
+                      <strong>All modules</strong>
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input"
+                        [checked]="checkedView" [indeterminate]="indeterminateView"
+                        (change)="onAllChecked('isView', $event)" />
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input"
+                        [checked]="checkedAdd" [indeterminate]="indeterminateAdd"
+                        (change)="onAllChecked('isAdd', $event)" />
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input"
+                        [checked]="checkedEdit" [indeterminate]="indeterminateEdit"
+                        (change)="onAllChecked('isEdit', $event)" />
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" class="form-check-input"
+                        [checked]="checkedDelete" [indeterminate]="indeterminateDelete"
+                        (change)="onAllChecked('isDelete', $event)" />
+                    </td>
+                  </tr>
+
+                  <ng-container *ngFor="let parent of filteredParentPages">
+                    <tr class="rp-row-parent" (click)="toggleCollapse(parent)">
+                      <td colspan="5">
+                        <div class="d-flex justify-content-between align-items-center">
+                          <span><i class="fas fa-folder me-2"></i>{{ parent.title }}</span>
+                          <i class="fas" [ngClass]="parent.isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <ng-container *ngIf="!parent.isCollapsed">
+                      <tr class="rp-row-child" *ngFor="let child of getChildren(parent.id)">
+                        <ng-container *ngFor="let permission of getPermissionsForPage(child.id)">
+                          <td class="ps-4"><i class="fas fa-minus me-2 rp-child-dash"></i>{{ child.title }}</td>
+                          <td class="text-center">
+                            <input type="checkbox" class="form-check-input"
+                              [checked]="permission.isView"
+                              (change)="onPermissionChange(permission, 'isView', $event)" />
+                          </td>
+                          <td class="text-center">
+                            <input type="checkbox" class="form-check-input"
+                              [checked]="permission.isAdd"
+                              (change)="onPermissionChange(permission, 'isAdd', $event)" />
+                          </td>
+                          <td class="text-center">
+                            <input type="checkbox" class="form-check-input"
+                              [checked]="permission.isEdit"
+                              (change)="onPermissionChange(permission, 'isEdit', $event)" />
+                          </td>
+                          <td class="text-center">
+                            <input type="checkbox" class="form-check-input"
+                              [checked]="permission.isDelete"
+                              (change)="onPermissionChange(permission, 'isDelete', $event)" />
+                          </td>
+                        </ng-container>
+                      </tr>
+                    </ng-container>
+                  </ng-container>
+
+                  <tr *ngIf="filteredParentPages.length === 0">
+                    <td colspan="5" class="text-center text-muted py-4">
+                      No modules match "{{ moduleSearchTerm }}".
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="rp-card" *ngIf="pagesResponse.length < 1">
+          <div class="rp-empty">
+            <i class="fas fa-folder-open"></i>
+            <p>No pages available to configure yet.</p>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Sticky action bar -->
+      <div class="rp-action-bar" *ngIf="pagesResponse.length > 0">
+        <button type="button" class="rp-btn rp-btn--primary" [disabled]="isSaving" (click)="savePermissions()">
+          <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+          <i class="fas fa-floppy-disk me-2" *ngIf="!isSaving"></i>
+          {{ isSaving ? 'Saving...' : (editMode ? 'Update Role' : 'Save Role') }}
+        </button>
+        <button type="button" class="rp-btn rp-btn--ghost" *ngIf="isFormChanged" [disabled]="isSaving" (click)="resetForm()">
+          <i class="fas fa-rotate-left me-2"></i>Reset
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- TAB 1: Assigned Roles                                         -->
+    <!-- ============================================================ -->
+    <div class="rp-tabpane" *ngIf="activeTab === 1">
+
+      <div class="rp-card">
+        <div class="rp-card__header">
+          <h6><i class="fas fa-users"></i> Roles &amp; assigned users</h6>
+          <div class="d-flex align-items-center gap-2">
+            <div class="rp-search">
+              <i class="fas fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search roles or users..." [(ngModel)]="roleSearchTerm" [ngModelOptions]="{standalone: true}" />
+            </div>
+            <button type="button" class="rp-btn rp-btn--primary rp-btn--sm" (click)="startNewRole()">
+              <i class="fas fa-plus me-1"></i> New Role
+            </button>
+          </div>
+        </div>
+
+        <div class="rp-card__body p-0">
+
+          <!-- Loading skeleton -->
+          <div class="p-3" *ngIf="isLoadingUsers">
+            <div class="rp-skeleton rp-skeleton--row" *ngFor="let s of [1,2,3]"></div>
+          </div>
+
+          <ng-container *ngIf="!isLoadingUsers">
+            <div class="rp-role" *ngFor="let role of filteredUserList">
+              <div class="rp-role__row" (click)="role.expand = !role.expand">
+                <div class="rp-role__main">
+                  <span class="rp-role__caret">
+                    <i class="fas" [ngClass]="role.expand ? 'fa-chevron-down' : 'fa-chevron-right'"
+                       *ngIf="role.assignedUsers.length > 0"></i>
+                  </span>
+                  <div>
+                    <a class="rp-role__name" (click)="onUserClick(role.id, role); $event.stopPropagation();">
+                      {{ role.name }}
+                    </a>
+                    <div class="rp-role__meta">Role ID #{{ role.id }}</div>
+                  </div>
+                </div>
+                <span class="rp-count-badge">
+                  <i class="fas fa-user"></i> {{ role.assignedUsers.length }}
+                  {{ role.assignedUsers.length === 1 ? 'user' : 'users' }}
+                </span>
+              </div>
+
+              <div class="rp-role__users" *ngIf="role.expand && role.assignedUsers.length > 0">
+                <div class="rp-user-chip" *ngFor="let user of role.assignedUsers">
+                  <div class="rp-avatar">{{ getInitials(user.firstName, user.lastName) }}</div>
+                  <div class="rp-user-chip__info">
+                    <div class="rp-user-chip__name">{{ user.firstName }} {{ user.lastName }}</div>
+                    <a class="rp-user-chip__email" href="mailto:{{ user.email }}">{{ user.email }}</a>
+                  </div>
+                  <span class="rp-user-chip__id">#{{ user.id }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="rp-empty" *ngIf="filteredUserList.length === 0 && userList.length > 0">
+              <i class="fas fa-magnifying-glass"></i>
+              <p>No roles match "{{ roleSearchTerm }}".</p>
+            </div>
+
+            <div class="rp-empty" *ngIf="userList.length === 0">
+              <i class="fas fa-user-shield"></i>
+              <p>No roles have been created yet.</p>
+              <button type="button" class="rp-btn rp-btn--primary rp-btn--sm" (click)="startNewRole()">
+                <i class="fas fa-plus me-1"></i> Create your first role
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
