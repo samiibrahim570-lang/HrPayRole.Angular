@@ -5,14 +5,14 @@
       <h1>Users</h1>
       <p class="subtitle">Manage system users, roles and access</p>
     </div>
-    <button type="button" class="btn btn-primary" (click)="onAdd()">
-      <span class="plus">+</span> Add User
+    <button nz-button nzType="primary" class="btn-add" (click)="onAdd()">
+      <i nz-icon nzType="plus" nzTheme="outline"></i> Add User
     </button>
   </div>
 
   <div class="toolbar">
     <div class="search-box">
-      <span class="search-icon">🔍</span>
+      <i nz-icon nzType="search" nzTheme="outline" class="search-icon"></i>
       <input
         type="text"
         placeholder="Search by name, email, contact or role..."
@@ -24,14 +24,13 @@
     </div>
   </div>
 
-  <div class="alert alert-error" *ngIf="errorMsg">
-    {{ errorMsg }}
-  </div>
+  <nz-alert *ngIf="errorMsg" nzType="error" nzShowIcon [nzMessage]="errorMsg"
+    class="form-alert"></nz-alert>
 
   <div class="table-card">
     <div class="loading-state" *ngIf="loading">
-      <div class="spinner"></div>
-      Loading users...
+      <nz-spin nzSimple [nzSize]="'large'"></nz-spin>
+      <span>Loading users...</span>
     </div>
 
     <div class="table-scroll" *ngIf="!loading && pagedUsers.length > 0">
@@ -41,29 +40,29 @@
             <th class="col-avatar"></th>
             <th class="sortable" (click)="sortBy('name')">
               Name
-              <span class="sort-icon" [class.active]="sortKey === 'name'">
-                {{ sortKey === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-              </span>
+              <i nz-icon
+                [nzType]="sortKey === 'name' ? (sortDir === 'asc' ? 'arrow-up' : 'arrow-down') : 'swap'"
+                class="sort-icon" [class.active]="sortKey === 'name'"></i>
             </th>
             <th class="sortable" (click)="sortBy('email')">
               Email
-              <span class="sort-icon" [class.active]="sortKey === 'email'">
-                {{ sortKey === 'email' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-              </span>
+              <i nz-icon
+                [nzType]="sortKey === 'email' ? (sortDir === 'asc' ? 'arrow-up' : 'arrow-down') : 'swap'"
+                class="sort-icon" [class.active]="sortKey === 'email'"></i>
             </th>
             <th>Contact</th>
             <th>WhatsApp</th>
             <th class="sortable" (click)="sortBy('role')">
               Role
-              <span class="sort-icon" [class.active]="sortKey === 'role'">
-                {{ sortKey === 'role' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-              </span>
+              <i nz-icon
+                [nzType]="sortKey === 'role' ? (sortDir === 'asc' ? 'arrow-up' : 'arrow-down') : 'swap'"
+                class="sort-icon" [class.active]="sortKey === 'role'"></i>
             </th>
             <th class="sortable" (click)="sortBy('status')">
               Status
-              <span class="sort-icon" [class.active]="sortKey === 'status'">
-                {{ sortKey === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-              </span>
+              <i nz-icon
+                [nzType]="sortKey === 'status' ? (sortDir === 'asc' ? 'arrow-up' : 'arrow-down') : 'swap'"
+                class="sort-icon" [class.active]="sortKey === 'status'"></i>
             </th>
             <th class="col-actions">Actions</th>
           </tr>
@@ -73,36 +72,49 @@
             <td class="col-avatar">
               <img *ngIf="user.image" [src]="user.image" alt class="avatar" />
               <div *ngIf="!user.image" class="avatar avatar-placeholder">
-                {{ (user.firstName || '?').charAt(0) }}{{ (user.lastName || '').charAt(0) }}
+                {{ (user.firstName || '?').charAt(0) }}{{ (user.lastName ||
+                '').charAt(0) }}
               </div>
             </td>
             <td>
-              <div class="user-name">{{ user.firstName }} {{ user.lastName }}</div>
-              <div class="user-address" *ngIf="user.address">{{ user.address }}</div>
+              <div class="user-name">{{ user.firstName }} {{ user.lastName
+                }}</div>
+              <div class="user-address" *ngIf="user.address"
+                [title]="user.address">{{ user.address }}</div>
             </td>
             <td>
-              <a class="email-link" [href]="'mailto:' + user.email">{{ user.email }}</a>
+              <a class="email-link" [href]="'mailto:' + user.email">{{
+                user.email }}</a>
             </td>
-            <td>{{ user.contactNumber || user.phoneNumber || '-' }}</td>
-            <td>{{ user.whatsAppNumber || '-' }}</td>
+            <td class="nowrap">{{ user.contactNumber || user.phoneNumber || '-'
+              }}</td>
+            <td class="nowrap">{{ user.whatsAppNumber || '-' }}</td>
             <td>
               <span class="role-badge">{{ user.roleName || '-' }}</span>
             </td>
             <td>
-              <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+              <span class="status-badge" [class.active]="user.isActive"
+                [class.inactive]="!user.isActive">
                 <span class="status-dot"></span>
                 {{ user.isActive ? 'Active' : 'Inactive' }}
               </span>
             </td>
             <td class="col-actions">
-              <button type="button" class="btn-icon" title="Edit" (click)="onEdit(user)">Edit</button>
+              <button nz-button nzType="text" nz-tooltip nzTooltipTitle="Edit"
+                class="btn-icon" (click)="onEdit(user)">
+                <i nz-icon nzType="edit" nzTheme="outline"></i>
+              </button>
               <button
-                type="button"
+                nz-button
+                nzType="text"
+                nz-tooltip
+                nzTooltipTitle="Delete"
                 class="btn-icon btn-danger"
-                title="Delete"
                 [disabled]="deletingGlobalId === user.globalId"
                 (click)="onDelete(user)">
-                {{ deletingGlobalId === user.globalId ? 'Deleting...' : 'Delete' }}
+                <i nz-icon
+                  [nzType]="deletingGlobalId === user.globalId ? 'loading' : 'delete'"
+                  nzTheme="outline"></i>
               </button>
             </td>
           </tr>
@@ -110,16 +122,28 @@
       </table>
     </div>
 
-    <div class="empty-state" *ngIf="!loading && pagedUsers.length === 0 && !errorMsg">
-      <div class="empty-icon">👥</div>
-      <p>No users found{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}.</p>
-      <button type="button" class="btn btn-primary" (click)="onAdd()" *ngIf="!searchTerm">
-        Add your first user
-      </button>
-    </div>
+    <nz-empty
+      *ngIf="!loading && pagedUsers.length === 0 && !errorMsg"
+      class="empty-state"
+      [nzNotFoundContent]="emptyContent">
+      <ng-template #emptyContent>
+        <span>No users found{{ searchTerm ? ' for "' + searchTerm + '"' : ''
+          }}.</span>
+        <div class="empty-action" *ngIf="!searchTerm">
+          <button nz-button nzType="primary" (click)="onAdd()">Add your first
+            user</button>
+        </div>
+      </ng-template>
+    </nz-empty>
 
     <div class="pagination" *ngIf="!loading && totalPages > 1">
-      <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹</button>
+      <button
+        type="button"
+        class="page-btn nav"
+        [disabled]="currentPage === 1"
+        (click)="goToPage(currentPage - 1)">
+        <i nz-icon nzType="left" nzTheme="outline"></i>
+      </button>
       <button
         type="button"
         class="page-btn"
@@ -128,7 +152,13 @@
         (click)="goToPage(p)">
         {{ p }}
       </button>
-      <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">›</button>
+      <button
+        type="button"
+        class="page-btn nav"
+        [disabled]="currentPage === totalPages"
+        (click)="goToPage(currentPage + 1)">
+        <i nz-icon nzType="right" nzTheme="outline"></i>
+      </button>
     </div>
   </div>
 

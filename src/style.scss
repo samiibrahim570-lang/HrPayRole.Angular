@@ -1,0 +1,290 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:host {
+  --ink: #1c2333;
+  --muted: #6b7280;
+  --bg: #eef1f7;
+  --surface: #ffffff;
+  --border: #e3e7ef;
+  --primary: #4f46e5;
+  --primary-ink: #ffffff;
+  --primary-soft: #eef0fe;
+  --teal: #0ea5a0;
+  --teal-soft: #e3f7f5;
+  --amber: #d97706;
+  --amber-soft: #fdf1e0;
+  --rose: #e0455f;
+  --rose-soft: #fdecee;
+  --danger: #e0453f;
+
+  display: block;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--ink);
+}
+
+.user-form-page {
+  background: var(--bg);
+  min-height: 100%;
+  padding: 4px 20px 100px;
+  box-sizing: border-box;
+  background: #ffff;
+}
+
+/* ---------- header ---------- */
+.page-header {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px 0 18px;
+  position: relative;
+
+  ::ng-deep .ant-page-header-heading-title {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  ::ng-deep .ant-page-header-heading-sub-title {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  ::ng-deep .ant-page-header-back-button {
+    color: var(--primary);
+    &:hover { color: var(--teal); }
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 56px;
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--teal));
+  }
+}
+
+.form-alert {
+  max-width: 820px;
+  margin: 0 auto 16px;
+  border-radius: 10px;
+}
+
+/* ---------- cards ---------- */
+.section-card {
+  max-width: 820px;
+  margin: 0 auto 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(28, 35, 51, 0.04);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(28, 35, 51, 0.06);
+  }
+
+  ::ng-deep .ant-card-head {
+    border-bottom: 1px solid var(--border);
+    min-height: auto;
+    padding: 16px 24px;
+  }
+
+  ::ng-deep .ant-card-head-title {
+    padding: 0;
+    overflow: visible;
+  }
+
+  ::ng-deep .ant-card-body {
+    padding: 22px 24px 8px;
+  }
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.accent-photo .icon-badge { background: var(--amber-soft); color: var(--amber); }
+.accent-account .icon-badge { background: var(--primary-soft); color: var(--primary); }
+.accent-personal .icon-badge { background: var(--teal-soft); color: var(--teal); }
+.accent-contact .icon-badge { background: var(--rose-soft); color: var(--rose); }
+
+/* ---------- form controls ---------- */
+::ng-deep .ant-form-item-label > label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+
+  &.ant-form-item-required::before {
+    color: var(--rose) !important;
+  }
+}
+
+::ng-deep .ant-input,
+::ng-deep .ant-select-selector {
+  border-radius: 10px !important;
+  border-color: var(--border) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+::ng-deep .ant-input:hover,
+::ng-deep .ant-select:hover .ant-select-selector {
+  border-color: var(--primary) !important;
+}
+
+::ng-deep .ant-input:focus,
+::ng-deep .ant-input-focused,
+::ng-deep .ant-select-focused .ant-select-selector {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-soft) !important;
+}
+
+::ng-deep .ant-select-selector {
+  min-height: 40px !important;
+}
+
+.active-toggle {
+  font-weight: 500;
+  ::ng-deep .ant-checkbox-checked .ant-checkbox-inner {
+    background-color: var(--teal);
+    border-color: var(--teal);
+  }
+}
+
+/* ---------- image uploader ---------- */
+.image-uploader {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding-bottom: 22px;
+}
+
+.avatar-uploader ::ng-deep .ant-upload.ant-upload-select-picture-card {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0;
+  border: 2px dashed #cfd6e4;
+  background: var(--primary-soft);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    border-color: var(--primary);
+    transform: scale(1.03);
+  }
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 600;
+
+  i { font-size: 20px; margin-bottom: 4px; }
+}
+
+.image-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.hint-error {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* ---------- footer action bar ---------- */
+.form-actions {
+  max-width: 820px;
+  margin: 24px auto 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  position: sticky;
+  bottom: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(28, 35, 51, 0.08);
+
+  ::ng-deep .ant-btn {
+    border-radius: 10px;
+    height: 40px;
+    padding: 0 22px;
+    font-weight: 600;
+  }
+}
+
+.btn-save {
+  background: linear-gradient(120deg, var(--primary), #6d5ef0);
+  border: none;
+
+  &:hover {
+    background: linear-gradient(120deg, #453ed1, #5e4fe0) !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .user-form-page {
+    padding: 4px 12px 96px;
+  }
+
+  .form-actions {
+    bottom: 8px;
+    justify-content: stretch;
+
+    ::ng-deep .ant-btn {
+      flex: 1;
+    }
+  }
+}
+.sticky-footer{
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  padding: 10px 0;
+  box-shadow: 0 -6px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  width: 100%;
+  position: fixed;
+}
+
