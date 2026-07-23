@@ -1,1 +1,117 @@
-<p>add-department works!</p>
+<div class="form-wrapper rounded-2">
+
+  <!-- Header -->
+  <div class="form-header">
+    <button class="btn-back" (click)="onCancel()">
+      <i class="bi bi-arrow-left"></i>
+    </button>
+    <div>
+      <h1 class="form-title">{{ isEditMode ? 'Edit Department' : 'Add New Department' }}</h1>
+      <p class="form-subtitle">
+        {{ isEditMode ? 'Update the department details below.' : 'Fill in the details to create a new department.' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="card loading-card">
+    <div class="spinner"></div>
+    <span>Loading department...</span>
+  </div>
+
+  <!-- Form Card -->
+  <div *ngIf="!isLoading" class="card form-card">
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      <i class="bi bi-check-circle-fill"></i> {{ successMessage }}
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <i class="bi bi-exclamation-circle-fill"></i> {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="deptForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <div class="form-grid">
+
+        <!-- Department Name -->
+        <div class="form-group" [class.has-error]="isInvalid('departmentName')">
+          <label class="form-label" for="deptName">
+            Department Name <span class="required">*</span>
+          </label>
+          <input id="deptName" type="text" class="form-input"
+                 formControlName="departmentName"
+                 placeholder="e.g. Engineering" autocomplete="off" />
+          <span *ngIf="isInvalid('departmentName')" class="error-msg">
+            {{ getError('departmentName') }}
+          </span>
+        </div>
+
+        <!-- Department Code -->
+        <div class="form-group" [class.has-error]="isInvalid('departmentCode')">
+          <label class="form-label" for="deptCode">Department Code</label>
+          <input id="deptCode" type="text" class="form-input"
+                 formControlName="departmentCode"
+                 placeholder="e.g. ENG-001" autocomplete="off" />
+          <span *ngIf="isInvalid('departmentCode')" class="error-msg">
+            {{ getError('departmentCode') }}
+          </span>
+          <span class="field-hint">Optional — a short unique code for this department.</span>
+        </div>
+
+      </div>
+
+      <!-- Description -->
+      <div class="form-group full-width" [class.has-error]="isInvalid('description')">
+        <label class="form-label" for="deptDesc">Description</label>
+        <textarea id="deptDesc" class="form-input form-textarea"
+                  formControlName="description"
+                  placeholder="Briefly describe the department's purpose and responsibilities..."
+                  rows="4"></textarea>
+        <div class="textarea-meta">
+          <span *ngIf="isInvalid('description')" class="error-msg">{{ getError('description') }}</span>
+          <span class="char-count">{{ deptForm.get('description')?.value?.length || 0 }} / 500</span>
+        </div>
+      </div>
+
+      <!-- Status Toggle -->
+      <div class="form-group full-width">
+        <label class="form-label">Status</label>
+        <div class="toggle-row">
+          <label class="toggle-switch">
+            <input type="checkbox" formControlName="isActive" />
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="toggle-label" [class.text-active]="deptForm.get('isActive')?.value">
+            {{ deptForm.get('isActive')?.value ? 'Active' : 'Inactive' }}
+          </span>
+          <span class="toggle-hint">
+            {{ deptForm.get('isActive')?.value
+              ? 'Department is visible and operational.'
+              : 'Department is hidden from active listings.' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="onCancel()" [disabled]="isSaving">
+          Cancel
+        </button>
+        <button type="submit" class="btn-save" [disabled]="isSaving || deptForm.invalid">
+          <span *ngIf="!isSaving">
+            <i class="bi" [class.bi-plus-lg]="!isEditMode" [class.bi-check-lg]="isEditMode"></i>
+            {{ isEditMode ? 'Save Changes' : 'Create Department' }}
+          </span>
+          <span *ngIf="isSaving" class="btn-loading">
+            <span class="btn-spinner"></span>
+            {{ isEditMode ? 'Saving...' : 'Creating...' }}
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

@@ -11,6 +11,7 @@ import { AuthGuard } from '../auth/interface/auth.guard';
     children: [
       {path: 'dashboard', loadChildren: () => import('../dashboard/dashboard.module').then(m => m.DashboardModule)},
       {path: 'administration', loadChildren: () => import('../administration/administration.module').then(m => m.AdministrationModule)},
+      {path: 'employees', loadChildren: () => import('../employee-management/employee-management.module').then(m => m.EmployeeManagementModule)},
     ],
   },
 ];
