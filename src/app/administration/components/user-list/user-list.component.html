@@ -12,6 +12,7 @@
 
   <div class="toolbar">
     <div class="search-box">
+      <span class="search-icon">🔍</span>
       <input
         type="text"
         placeholder="Search by name, email, contact or role..."
@@ -29,74 +30,96 @@
 
   <div class="table-card">
     <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
       Loading users...
     </div>
 
-    <table class="user-table" *ngIf="!loading && pagedUsers.length > 0">
-      <thead>
-        <tr>
-          <th class="col-avatar"></th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Contact</th>
-          <th>Role</th>
-          <th>Status</th>
-          <th class="col-actions">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let user of pagedUsers; trackBy: trackByGlobalId">
-          <td class="col-avatar">
-            <img *ngIf="user.image" [src]="user.image" alt class="avatar" />
-            <div *ngIf="!user.image" class="avatar avatar-placeholder">
-              {{ (user.firstName || '?').charAt(0) }}{{ (user.lastName ||
-              '').charAt(0) }}
-            </div>
-          </td>
-          <td>
-            <div class="user-name">{{ user.firstName }} {{ user.lastName
-              }}</div>
-          </td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.contactNumber || user.phoneNumber || '-' }}</td>
-          <td>
-            <span class="role-badge">{{ user.roleName || '-' }}</span>
-          </td>
-          <td>
-            <span class="status-badge" [class.active]="user.isActive"
-              [class.inactive]="!user.isActive">
-              {{ user.isActive ? 'Active' : 'Inactive' }}
-            </span>
-          </td>
-          <td class="col-actions">
-            <button type="button" class="btn-icon" title="Edit"
-              (click)="onEdit(user)">Edit</button>
-            <button
-              type="button"
-              class="btn-icon btn-danger"
-              title="Delete"
-              [disabled]="deletingGlobalId === user.globalId"
-              (click)="onDelete(user)">
-              {{ deletingGlobalId === user.globalId ? 'Deleting...' : 'Delete'
-              }}
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-scroll" *ngIf="!loading && pagedUsers.length > 0">
+      <table class="user-table">
+        <thead>
+          <tr>
+            <th class="col-avatar"></th>
+            <th class="sortable" (click)="sortBy('name')">
+              Name
+              <span class="sort-icon" [class.active]="sortKey === 'name'">
+                {{ sortKey === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('email')">
+              Email
+              <span class="sort-icon" [class.active]="sortKey === 'email'">
+                {{ sortKey === 'email' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+              </span>
+            </th>
+            <th>Contact</th>
+            <th>WhatsApp</th>
+            <th class="sortable" (click)="sortBy('role')">
+              Role
+              <span class="sort-icon" [class.active]="sortKey === 'role'">
+                {{ sortKey === 'role' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+              </span>
+            </th>
+            <th class="sortable" (click)="sortBy('status')">
+              Status
+              <span class="sort-icon" [class.active]="sortKey === 'status'">
+                {{ sortKey === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+              </span>
+            </th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of pagedUsers; trackBy: trackByGlobalId">
+            <td class="col-avatar">
+              <img *ngIf="user.image" [src]="user.image" alt class="avatar" />
+              <div *ngIf="!user.image" class="avatar avatar-placeholder">
+                {{ (user.firstName || '?').charAt(0) }}{{ (user.lastName || '').charAt(0) }}
+              </div>
+            </td>
+            <td>
+              <div class="user-name">{{ user.firstName }} {{ user.lastName }}</div>
+              <div class="user-address" *ngIf="user.address">{{ user.address }}</div>
+            </td>
+            <td>
+              <a class="email-link" [href]="'mailto:' + user.email">{{ user.email }}</a>
+            </td>
+            <td>{{ user.contactNumber || user.phoneNumber || '-' }}</td>
+            <td>{{ user.whatsAppNumber || '-' }}</td>
+            <td>
+              <span class="role-badge">{{ user.roleName || '-' }}</span>
+            </td>
+            <td>
+              <span class="status-badge" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+                <span class="status-dot"></span>
+                {{ user.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="col-actions">
+              <button type="button" class="btn-icon" title="Edit" (click)="onEdit(user)">Edit</button>
+              <button
+                type="button"
+                class="btn-icon btn-danger"
+                title="Delete"
+                [disabled]="deletingGlobalId === user.globalId"
+                (click)="onDelete(user)">
+                {{ deletingGlobalId === user.globalId ? 'Deleting...' : 'Delete' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-    <div class="empty-state"
-      *ngIf="!loading && pagedUsers.length === 0 && !errorMsg">
+    <div class="empty-state" *ngIf="!loading && pagedUsers.length === 0 && !errorMsg">
+      <div class="empty-icon">👥</div>
       <p>No users found{{ searchTerm ? ' for "' + searchTerm + '"' : '' }}.</p>
-      <button type="button" class="btn btn-primary" (click)="onAdd()"
-        *ngIf="!searchTerm">
+      <button type="button" class="btn btn-primary" (click)="onAdd()" *ngIf="!searchTerm">
         Add your first user
       </button>
     </div>
 
     <div class="pagination" *ngIf="!loading && totalPages > 1">
-      <button type="button" class="page-btn" [disabled]="currentPage === 1"
-        (click)="goToPage(currentPage - 1)">‹</button>
+      <button type="button" class="page-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">‹</button>
       <button
         type="button"
         class="page-btn"
@@ -105,9 +128,7 @@
         (click)="goToPage(p)">
         {{ p }}
       </button>
-      <button type="button" class="page-btn"
-        [disabled]="currentPage === totalPages"
-        (click)="goToPage(currentPage + 1)">›</button>
+      <button type="button" class="page-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">›</button>
     </div>
   </div>
 

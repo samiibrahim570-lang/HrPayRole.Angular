@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, EventEmitter, Output, OnInit } from '@angular/core';
 import { UserRegisterResponse } from '../../interfaces/pagesWithControl';
 import { UserregistrationService } from '../../sservices/userregistration.service';
+
+type SortKey = 'name' | 'email' | 'role' | 'status';
+type SortDir = 'asc' | 'desc';
 
 @Component({
   selector: 'app-user-list',
@@ -9,6 +11,10 @@ import { UserregistrationService } from '../../sservices/userregistration.servic
   styleUrls: ['./user-list.component.scss']
 })
 export class UserListComponent implements OnInit {
+
+  // Router.navigate() ki jagah — parent (users-page) inhe sun kar tab badalta hai
+  @Output() addUser = new EventEmitter<void>();
+  @Output() editUser = new EventEmitter<string>(); // globalId bhejta hai
 
   allUsers: UserRegisterResponse[] = [];
   filteredUsers: UserRegisterResponse[] = [];
@@ -26,10 +32,11 @@ export class UserListComponent implements OnInit {
   // used to disable the delete button on the row being deleted
   deletingGlobalId: string | null = null;
 
-  constructor(
-    private userService: UserregistrationService,
-    private router: Router
-  ) { }
+  // grid sorting
+  sortKey: SortKey = 'name';
+  sortDir: SortDir = 'asc';
+
+  constructor(private userService: UserregistrationService) { }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -40,7 +47,7 @@ export class UserListComponent implements OnInit {
     this.errorMsg = '';
     this.userService.getAllUsers().subscribe({
       next: (response: any) => {
-        this.allUsers = response?.data ?? [];
+        this.allUsers = response?.result ?? [];
         this.applyFilter();
         this.loading = false;
       },
@@ -54,21 +61,67 @@ export class UserListComponent implements OnInit {
 
   applyFilter(): void {
     const term = this.searchTerm.trim().toLowerCase();
-    this.filteredUsers = !term
+    let result = !term
       ? [...this.allUsers]
       : this.allUsers.filter(u =>
         `${u.firstName} ${u.lastName}`.toLowerCase().includes(term) ||
         (u.email ?? '').toLowerCase().includes(term) ||
         (u.contactNumber ?? '').toLowerCase().includes(term) ||
+        (u.whatsAppNumber ?? '').toLowerCase().includes(term) ||
         (u.roleName ?? '').toLowerCase().includes(term)
       );
 
+    result = this.sortUsers(result);
+
+    this.filteredUsers = result;
     this.currentPage = 1;
     this.updatePagination();
   }
 
   onSearchChange(): void {
     this.applyFilter();
+  }
+
+  sortBy(key: SortKey): void {
+    if (this.sortKey === key) {
+      this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortKey = key;
+      this.sortDir = 'asc';
+    }
+    this.applyFilter();
+  }
+
+  private sortUsers(users: UserRegisterResponse[]): UserRegisterResponse[] {
+    const dir = this.sortDir === 'asc' ? 1 : -1;
+
+    return [...users].sort((a, b) => {
+      let valA: string | number = '';
+      let valB: string | number = '';
+
+      switch (this.sortKey) {
+        case 'name':
+          valA = `${a.firstName ?? ''} ${a.lastName ?? ''}`.toLowerCase();
+          valB = `${b.firstName ?? ''} ${b.lastName ?? ''}`.toLowerCase();
+          break;
+        case 'email':
+          valA = (a.email ?? '').toLowerCase();
+          valB = (b.email ?? '').toLowerCase();
+          break;
+        case 'role':
+          valA = (a.roleName ?? '').toLowerCase();
+          valB = (b.roleName ?? '').toLowerCase();
+          break;
+        case 'status':
+          valA = a.isActive ? 1 : 0;
+          valB = b.isActive ? 1 : 0;
+          break;
+      }
+
+      if (valA < valB) return -1 * dir;
+      if (valA > valB) return 1 * dir;
+      return 0;
+    });
   }
 
   updatePagination(): void {
@@ -91,11 +144,11 @@ export class UserListComponent implements OnInit {
   }
 
   onAdd(): void {
-    this.router.navigate(['/users/create']);
+    this.addUser.emit();
   }
 
   onEdit(user: UserRegisterResponse): void {
-    this.router.navigate(['/users/edit', user.globalId]);
+    this.editUser.emit(user.globalId);
   }
 
   onDelete(user: UserRegisterResponse): void {

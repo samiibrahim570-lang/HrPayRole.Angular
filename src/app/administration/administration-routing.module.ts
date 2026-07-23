@@ -4,10 +4,12 @@ import { AssignPermissionsComponent } from './components/assign-permissions/assi
 import { AuthGuard } from '../auth/interface/auth.guard';
 import { permissionGuard } from '../auth/interface/permission.guard';
 import { UserCreateComponent } from './components/user-create/user-create.component';
+import { UserListComponent } from './components/user-list/user-list.component';
+import { UsersPageComponent } from './components/users-page/users-page.component';
 
 const routes: Routes = [
   {path: 'roles', component: AssignPermissionsComponent},
-  {path: 'users', component: UserCreateComponent},
+  {path: 'users', component: UsersPageComponent},
 ];
 
 @NgModule({

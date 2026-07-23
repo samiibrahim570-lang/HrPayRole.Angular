@@ -7,12 +7,15 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'; // <-- ONLY R
 import { AssignPermissionsComponent } from './components/assign-permissions/assign-permissions.component';
 import { UserCreateComponent } from './components/user-create/user-create.component';
 import { UserListComponent } from './components/user-list/user-list.component';
+import { UsersPageComponent } from './components/users-page/users-page.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
     AssignPermissionsComponent,
     UserCreateComponent,
-    UserListComponent
+    UserListComponent,
+    UsersPageComponent
   ],
   imports: [
     CommonModule,

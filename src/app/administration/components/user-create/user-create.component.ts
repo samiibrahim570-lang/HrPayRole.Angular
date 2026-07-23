@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { NzUploadFile } from 'ng-zorro-antd/upload';
 import { GetRolesResponse } from '../../interfaces/GetRolesResponse';
 import { UserregistrationService } from '../../sservices/userregistration.service';
 import { UserRegisterResponse, UserRegister } from '../../interfaces/pagesWithControl';
@@ -18,38 +18,45 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
   templateUrl: './user-create.component.html',
   styleUrls: ['./user-create.component.scss']
 })
-export class UserCreateComponent implements OnInit {
+export class UserCreateComponent implements OnInit, OnChanges {
+  @Input() editGlobalId: string | null = null;
+  @Output() saved = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   form: FormGroup;
-
-  roles: GetRolesResponse[] = [];
-  filteredRoles: GetRolesResponse[] = [];
+  rolesList: GetRolesResponse[] = [];
   rolesLoading = false;
-  roleDropdownOpen = false;
-  roleSearchTerm = '';
 
   isEditMode = false;
-  globalId: string | null = null;
-
-  loading = false;   // loading existing user for edit
-  saving = false;    // submit in progress
+  loading = false;
+  saving = false;
   errorMsg = '';
-
   imagePreview: string | null = null;
   imageError = '';
 
-  // basic guard rails for the uploaded photo
   private readonly MAX_IMAGE_SIZE_MB = 2;
   private readonly ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 
   constructor(
     private fb: FormBuilder,
-    private userService: UserregistrationService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private elRef: ElementRef
+    private userService: UserregistrationService
   ) {
-    this.form = this.fb.group({
+    this.form = this.buildForm();
+  }
+
+  ngOnInit(): void {
+    this.loadRoles();
+    this.setupForMode();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['editGlobalId'] && !changes['editGlobalId'].firstChange) {
+      this.setupForMode();
+    }
+  }
+
+  private buildForm(): FormGroup {
+    return this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: [''],
       confirmPassword: [''],
@@ -66,17 +73,18 @@ export class UserCreateComponent implements OnInit {
     }, { validators: passwordsMatchValidator });
   }
 
-  ngOnInit(): void {
-    this.loadRoles();
+  private setupForMode(): void {
+    this.errorMsg = '';
+    this.imagePreview = null;
+    this.imageError = '';
+    this.form = this.buildForm();
 
-    this.globalId = this.route.snapshot.paramMap.get('globalId');
-    this.isEditMode = !!this.globalId;
+    this.isEditMode = !!this.editGlobalId;
 
     if (this.isEditMode) {
-      // password not required when editing an existing user
       this.form.get('password')?.clearValidators();
       this.form.get('confirmPassword')?.clearValidators();
-      this.loadUser(this.globalId as string);
+      this.loadUser(this.editGlobalId as string);
     } else {
       this.form.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
       this.form.get('confirmPassword')?.setValidators([Validators.required]);
@@ -85,56 +93,17 @@ export class UserCreateComponent implements OnInit {
     this.form.get('confirmPassword')?.updateValueAndValidity();
   }
 
-  loadRoles(): void {
+  private loadRoles(): void {
     this.rolesLoading = true;
     this.userService.getAllRoles().subscribe({
-      // NOTE: assuming `response.data` holds the roles array — adjust if your
-      // ResponseModelArray uses a different property name.
-      next: (response: any) => {
-        this.roles = response?.data ?? [];
-        this.filteredRoles = this.roles;
+      next: (res: any) => {
+        this.rolesList = res.result || [];
         this.rolesLoading = false;
       },
-      error: (err) => {
-        console.error('Failed to load roles', err);
+      error: () => {
         this.rolesLoading = false;
       }
     });
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    if (this.roleDropdownOpen && !this.elRef.nativeElement.contains(event.target)) {
-      this.roleDropdownOpen = false;
-    }
-  }
-
-  toggleRoleDropdown(): void {
-    if (this.rolesLoading) return;
-    this.roleDropdownOpen = !this.roleDropdownOpen;
-    if (this.roleDropdownOpen) {
-      this.roleSearchTerm = '';
-      this.filteredRoles = this.roles;
-    }
-  }
-
-  filterRoles(): void {
-    const term = this.roleSearchTerm.trim().toLowerCase();
-    this.filteredRoles = !term
-      ? this.roles
-      : this.roles.filter(r => r.name.toLowerCase().includes(term));
-  }
-
-  selectRole(role: GetRolesResponse): void {
-    this.form.patchValue({ roleId: role.id, roleName: role.name });
-    this.form.get('roleId')?.markAsTouched();
-    this.roleDropdownOpen = false;
-  }
-
-  clearRole(event: Event): void {
-    event.stopPropagation();
-    this.form.patchValue({ roleId: null, roleName: '' });
-    this.form.get('roleId')?.markAsTouched();
   }
 
   loadUser(globalId: string): void {
@@ -168,19 +137,22 @@ export class UserCreateComponent implements OnInit {
     });
   }
 
-  onImageSelected(event: Event): void {
+  /**
+   * Hooked into nz-upload's nzBeforeUpload. Returning false prevents
+   * ng-zorro from auto-uploading the file to a remote endpoint — we just
+   * want to validate it and read it into the form as base64.
+   */
+  beforeUpload = (file: NzUploadFile): boolean => {
     this.imageError = '';
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+    const rawFile = file as unknown as File;
 
-    if (!this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    if (!this.ALLOWED_IMAGE_TYPES.includes(rawFile.type)) {
       this.imageError = 'Please upload a PNG, JPG or WEBP image.';
-      return;
+      return false;
     }
-    if (file.size > this.MAX_IMAGE_SIZE_MB * 1024 * 1024) {
+    if (rawFile.size > this.MAX_IMAGE_SIZE_MB * 1024 * 1024) {
       this.imageError = `Image must be smaller than ${this.MAX_IMAGE_SIZE_MB}MB.`;
-      return;
+      return false;
     }
 
     const reader = new FileReader();
@@ -192,8 +164,10 @@ export class UserCreateComponent implements OnInit {
     reader.onerror = () => {
       this.imageError = 'Could not read the selected image. Please try again.';
     };
-    reader.readAsDataURL(file);
-  }
+    reader.readAsDataURL(rawFile);
+
+    return false;
+  };
 
   removeImage(): void {
     this.form.patchValue({ image: '' });
@@ -209,39 +183,40 @@ export class UserCreateComponent implements OnInit {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      Object.values(this.form.controls).forEach(control => {
+        control.updateValueAndValidity({ onlySelf: true });
+      });
       return;
     }
 
     this.saving = true;
     const value = this.form.getRawValue();
 
-    if (this.isEditMode && this.globalId) {
-      const payload: UserRegisterResponse = { ...value, globalId: this.globalId };
+    if (this.isEditMode && this.editGlobalId) {
+      const payload: UserRegisterResponse = { ...value, globalId: this.editGlobalId };
       // password fields are not sent on update unless the user actually typed a new one
       if (!payload.password) {
         delete payload.password;
         delete payload.confirmPassword;
       }
 
-      this.userService.updateRegister(this.globalId, payload).subscribe({
-        next: () => this.goToListAfterSave(),
+      this.userService.updateRegister(this.editGlobalId, payload).subscribe({
+        next: () => this.finishSave(),
         error: (err) => this.handleSaveError(err)
       });
     } else {
       const payload: UserRegister = { ...value };
 
       this.userService.UserRegister(payload).subscribe({
-        next: () => this.goToListAfterSave(),
+        next: () => this.finishSave(),
         error: (err) => this.handleSaveError(err)
       });
     }
   }
 
-  private goToListAfterSave(): void {
+  private finishSave(): void {
     this.saving = false;
-    // navigating back to the list triggers its own ngOnInit,
-    // which re-calls getAllUsers() and shows the freshly saved user
-    this.router.navigate(['/users']);
+    this.saved.emit();
   }
 
   private handleSaveError(err: any): void {
@@ -253,6 +228,6 @@ export class UserCreateComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/users']);
+    this.cancelled.emit();
   }
 }

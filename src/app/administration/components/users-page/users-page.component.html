@@ -1,0 +1,17 @@
+<div class="users-page">
+  <div class="tabs">
+
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'form'"
+      (click)="activeTab === 'form' ? null : onAddUser()">
+      {{ editGlobalId ? 'Edit User' : 'Add User' }}
+    </button>
+     <button type="button" class="tab-btn" [class.active]="activeTab === 'list'" (click)="activeTab = 'list'">
+      Users List
+    </button>
+  </div>
+  <app-user-create *ngIf="activeTab === 'form'" [editGlobalId]="editGlobalId" (saved)="onFormDone()"
+    (cancelled)="onFormDone()">
+  </app-user-create>
+  <app-user-list *ngIf="activeTab === 'list'" (addUser)="onAddUser()" (editUser)="onEditUser($event)">
+  </app-user-list>
+</div>
