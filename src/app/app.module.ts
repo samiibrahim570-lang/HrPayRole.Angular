@@ -15,6 +15,7 @@ import { LicenseInterceptor } from './auth/service/license.interceptor';
 import { AuthRoutingModule } from './auth/auth-routing.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { AdministrationModule } from './administration/administration.module';
+import { EmployeeManagementModule } from './employee-management/employee-management.module';
 registerLocaleData(en);
 
 @NgModule({
@@ -31,7 +32,8 @@ registerLocaleData(en);
     SharedModule,
     LayoutModule,
     DashboardModule,
-    AdministrationModule
+    AdministrationModule,
+    EmployeeManagementModule
   ],
   providers: [
     {
