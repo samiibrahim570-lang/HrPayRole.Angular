@@ -4,7 +4,6 @@ import { AuthService } from 'src/app/auth/service/auth.service';
 import { MenuItem } from '../../interface/menu-item';
 import { MenuService } from '../../service/menu.service';
 import { Theme, ThemeService } from '../../service/theme.service';
-import { Lang, TranslationService } from '../../service/translation.service';
 
 @Component({
   selector: 'app-main-layout',
@@ -14,7 +13,6 @@ import { Lang, TranslationService } from '../../service/translation.service';
 export class MainLayoutComponent {
   menu$: Observable<MenuItem[]>;
   theme$: Observable<Theme>;
-  lang$: Observable<Lang>;
   user: any;
 
   private iconMap: Record<string, string> = {
@@ -51,11 +49,9 @@ export class MainLayoutComponent {
     private authService: AuthService,
     private menuService: MenuService,
     private themeService: ThemeService,
-    private translationService: TranslationService
   ) {
     this.menu$ = this.menuService.menu$;
     this.theme$ = this.themeService.theme$;
-    this.lang$ = this.translationService.lang$;
   }
 
   ngOnInit(): void {
@@ -79,10 +75,6 @@ export class MainLayoutComponent {
 
   toggleTheme(): void {
     this.themeService.toggleTheme();
-  }
-
-  toggleLang(): void {
-    this.translationService.toggleLang();
   }
 
   logout(): void {

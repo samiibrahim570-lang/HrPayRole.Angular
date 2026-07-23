@@ -1,0 +1,169 @@
+<!-- ── DASHBOARD VIEW ── -->
+<div *ngIf="currentView === 'dashboard'" class="dept-wrapper">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Department Overview</h1>
+      <p class="page-subtitle">Manage organizational structure and departmental resources.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-export">
+        <i class="bi bi-box-arrow-up"></i> Export
+      </button>
+      <button class="btn-add" (click)="showAddForm()">
+        <i class="bi bi-plus-lg"></i> Add New Department
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-diagram-3"></i></div>
+      <div class="stat-body">
+        <span class="stat-badge">+2 this Q</span>
+        <p class="stat-label">TOTAL DEPARTMENTS</p>
+        <h2 class="stat-value">{{ totalDepartments }}</h2>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="bi bi-people"></i></div>
+      <div class="stat-body">
+        <p class="stat-label">ACTIVE / INACTIVE</p>
+        <h2 class="stat-value">{{ activeDepartments }} <span class="stat-sub">/ {{ inactiveDepartments }}</span></h2>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill"
+               [style.width.%]="totalDepartments ? (activeDepartments / totalDepartments) * 100 : 0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon teal"><i class="bi bi-currency-dollar"></i></div>
+      <div class="stat-body">
+        <span class="stat-badge orange">84% Utilized</span>
+        <p class="stat-label">BUDGET UTILIZATION</p>
+        <h2 class="stat-value">$12.4M <span class="stat-sub">/ $14.8M</span></h2>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-graph-up-arrow"></i></div>
+      <div class="stat-body">
+        <p class="stat-label">DEPT. PERFORMANCE</p>
+        <h2 class="stat-value green-text">92.4%</h2>
+        <p class="stat-hint">Avg. Efficiency</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="errorMessage" class="alert-error">
+    <i class="bi bi-exclamation-circle"></i> {{ errorMessage }}
+    <button (click)="loadDepartments()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+
+    <!-- Toolbar -->
+    <div class="table-toolbar">
+      <div class="filter-tabs">
+        <button [class.active]="activeFilter === 'All'"      (click)="setFilter('All')">All</button>
+        <button [class.active]="activeFilter === 'Active'"   (click)="setFilter('Active')">Active</button>
+        <button [class.active]="activeFilter === 'Inactive'" (click)="setFilter('Inactive')">Inactive</button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn-filter"><i class="bi bi-funnel"></i> Filters</button>
+        <span class="display-info">Displaying {{ showingStart }}–{{ showingEnd }} of {{ filteredDepartments.length }}</span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="spinner"></div>
+      <span>Loading departments...</span>
+    </div>
+
+    <!-- Table -->
+    <div *ngIf="!isLoading" class="table-responsive">
+      <table class="dept-table">
+        <thead>
+          <tr>
+            <th>DEPARTMENT NAME</th>
+            <th>DEPT. CODE</th>
+            <th>DESCRIPTION</th>
+            <th>STATUS</th>
+            <th>CREATED ON</th>
+            <th>MODIFIED ON</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let dept of pagedDepartments">
+            <td>
+              <div class="dept-name-cell">
+                <div class="dept-icon"><i class="bi bi-diagram-3-fill"></i></div>
+                <span class="dept-name">{{ dept.departmentName }}</span>
+              </div>
+            </td>
+            <td><span class="dept-code">{{ dept.departmentCode || '—' }}</span></td>
+            <td class="desc-cell">{{ dept.description || '—' }}</td>
+            <td>
+              <span class="status-badge" [class.active]="dept.isActive" [class.inactive]="!dept.isActive">
+                {{ dept.isActive ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="date-cell">{{ formatDate(dept.createdOn) }}</td>
+            <td class="date-cell">{{ formatDate(dept.modifiedOn) }}</td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-icon edit" (click)="showEditForm(dept.id)" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn-icon deactivate" (click)="deactivateDepartment(dept.id)"
+                        [disabled]="!dept.isActive" title="Deactivate">
+                  <i class="bi bi-slash-circle"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="pagedDepartments.length === 0">
+            <td colspan="7" class="empty-state">
+              <i class="bi bi-inbox"></i>
+              <p>No departments found.</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-bar" *ngIf="!isLoading">
+      <span class="page-info">Showing {{ showingStart }}–{{ showingEnd }} of {{ filteredDepartments.length }} departments</span>
+      <div class="page-controls">
+        <button class="page-btn nav" (click)="setPage(currentPage - 1)" [disabled]="currentPage === 1">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button *ngFor="let p of pageNumbers" class="page-btn"
+                [class.current]="p === currentPage" (click)="setPage(p)">
+          {{ p }}
+        </button>
+        <button class="page-btn nav" (click)="setPage(currentPage + 1)" [disabled]="currentPage === totalPages">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── ADD / EDIT FORM VIEW ── -->
+<app-add-department
+  *ngIf="currentView === 'add' || currentView === 'edit'"
+  [departmentId]="selectedDepartmentId"
+  (formClosed)="showDashboard()">
+</app-add-department>
